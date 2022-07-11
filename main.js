@@ -4,6 +4,7 @@ var url = require('url'); // 모듈 url
 var qs = require('querystring'); // 모듈 querystring
 var template = require('./lib/template.js');
 var path = require('path');
+var sanitizeHtml = require('sanitize-html'); // 태그를 살균
 
 var app = http.createServer(function(request, response){ // nodejs로 웹 브라우저 접속이 들어올 때마다 createServer의 콜백함수 호출, request는 웹 브라우저가 요청할 때 보낸 정보, response는 응답할 때 웹 브라우저에게 전송할 정보
     var _url = request.url; // query
@@ -29,13 +30,15 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
           var filteredId = path.parse(queryData.id).base;
           fs.readFile(`data/${filteredId}`, 'utf8', (err, description)=>{
             var title = queryData.id;
+            var sanitizeTitle = sanitizeHtml(title);
+            var sanitizeDescription = sanitizeHtml(description, {allowTags:['h1']});
             var list = template.list(filelist);
-            var html = template.HTML(title, list,
-              `<h2>${title}</h2>${description}`,
+            var html = template.HTML(sanitizeTitle, list,
+              `<h2>${sanitizeTitle}</h2>${sanitizeDescription}`,
               `<a href="/create">create</a>
-               <a href="/update?id=${title}">update</a>
+               <a href="/update?id=${sanitizeTitle}">update</a>
                <form action="/delete_process" method="post">
-                <input type="hidden" name="id" value="${title}">
+                <input type="hidden" name="id" value="${sanitizeTitle}">
                 <input type="submit" value="delete">
                </form>`
             );

@@ -3,6 +3,7 @@ var fs = require('fs'); // 모듈 fs : nodejs의 모듈인 파일 시스템
 var url = require('url'); // 모듈 url
 var qs = require('querystring'); // 모듈 querystring
 var template = require('./lib/template.js');
+var path = require('path');
 
 var app = http.createServer(function(request, response){ // nodejs로 웹 브라우저 접속이 들어올 때마다 createServer의 콜백함수 호출, request는 웹 브라우저가 요청할 때 보낸 정보, response는 응답할 때 웹 브라우저에게 전송할 정보
     var _url = request.url; // query
@@ -25,7 +26,8 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
         })
       } else {
         fs.readdir('./data', (err, filelist)=>{
-          fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
+          var filteredId = path.parse(queryData.id).base;
+          fs.readFile(`data/${filteredId}`, 'utf8', (err, description)=>{
             var title = queryData.id;
             var list = template.list(filelist);
             var html = template.HTML(title, list,
@@ -76,7 +78,8 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
       });
     } else if(pathname === '/update') { // update 버튼 눌렀을 경우
       fs.readdir('./data', (err, filelist)=>{
-        fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
+        var filteredId = path.parse(queryData.id).base;
+        fs.readFile(`data/${filteredId}`, 'utf8', (err, description)=>{
           var title = queryData.id;
           var list = template.list(filelist);
           var html = template.HTML(title, list,
@@ -123,7 +126,8 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
       request.on('end', function(){
         var post = qs.parse(body);
         var id = post.id;
-        fs.unlink(`data/${id}`, (err)=>{
+        var filteredId = path.parse(id).base;
+        fs.unlink(`data/${filteredId}`, (err)=>{
           response.writeHead(302, {Location: `/`}); // home으로 보내기
           response.end();
         })

@@ -140,4 +140,4 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
       response.end('Not found');
     }
 });
-app.listen(3000);
+app.listen(3000); // 요청에 대해 응답할 수 있도록 HTTP 서버 구동, 3000번 포트 사용

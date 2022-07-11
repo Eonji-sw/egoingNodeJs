@@ -10,9 +10,16 @@ var app = http.createServer(function(request,response){
 
     if(pathname === '/'){
       if(queryData.id === undefined) { // home일 경우
-        fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
+        fs.readdir('./data', (err, filelist)=>{
           var title = 'Welcome';
           var description = 'Hello, Node.js';
+          var list = '<ul>';
+          var i = 0;
+          while(i < filelist.length) {
+            list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+            i += 1;
+          }
+          list = list + '</ul>';
           var template = `
           <!doctype html>
           <html>
@@ -22,11 +29,7 @@ var app = http.createServer(function(request,response){
           </head>
           <body>
             <h1><a href="/">WEB</a></h1>
-            <ul>
-              <li><a href="/?id=HTML">HTML</a></li>
-              <li><a href="/?id=CSS">CSS</a></li>
-              <li><a href="/?id=JavaScript">JavaScript</a></li>
-            </ul>
+            ${list}
             <h2>${title}</h2>
             <p>${description}</p>
           </body>
@@ -34,38 +37,42 @@ var app = http.createServer(function(request,response){
           `;
           response.writeHead(200); // 파일을 성공적으로 전송
           response.end(template);
-        });
+        })
       } else {
-        fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
-          var title = queryData.id;
-          var template = `
-          <!doctype html>
-          <html>
-          <head>
-            <title>WEB1 - ${title}</title>
-            <meta charset="utf-8">
-          </head>
-          <body>
-            <h1><a href="/">WEB</a></h1>
-            <ul>
-              <li><a href="/?id=HTML">HTML</a></li>
-              <li><a href="/?id=CSS">CSS</a></li>
-              <li><a href="/?id=JavaScript">JavaScript</a></li>
-            </ul>
-            <h2>${title}</h2>
-            <p>${description}</p>
-          </body>
-          </html>
-          `;
-          response.writeHead(200); // 파일을 성공적으로 전송
-          response.end(template);
+        fs.readdir('./data', (err, filelist)=>{
+          var list = '<ul>';
+          var i = 0;
+          while(i < filelist.length) {
+            list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+            i += 1;
+          }
+          list = list + '</ul>';
+          fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
+            var title = queryData.id;
+            var template = `
+            <!doctype html>
+            <html>
+            <head>
+              <title>WEB1 - ${title}</title>
+              <meta charset="utf-8">
+            </head>
+            <body>
+              <h1><a href="/">WEB</a></h1>
+              ${list}
+              <h2>${title}</h2>
+              <p>${description}</p>
+            </body>
+            </html>
+            `;
+            response.writeHead(200); // 파일을 성공적으로 전송
+            response.end(template);
+          });
         });
       }
     } else {
       response.writeHead(404); // 파일을 찾을 수 없는 경우
       response.end('Not found');
     }
-
 
 });
 app.listen(3000);

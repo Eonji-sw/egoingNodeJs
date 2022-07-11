@@ -3,33 +3,33 @@ var fs = require('fs'); // 모듈 fs : nodejs의 모듈인 파일 시스템
 var url = require('url'); // 모듈 url
 var qs = require('querystring'); // 모듈 querystring
 
-function templateHTML(title, list, body, control){
-  return `
-  <!doctype html>
-  <html>
-  <head>
-    <title>WEB1 - ${title}</title>
-    <meta charset="utf-8">
-  </head>
-  <body>
-    <h1><a href="/">WEB</a></h1>
-    ${list}
-    ${control}
-    ${body}
-  </body>
-  </html>
-  `;
-}
-
-function templateList(filelist){ // 글 목록
-  var list = '<ul>';
-  var i = 0;
-  while(i < filelist.length) {
-    list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-    i += 1;
+var template = { // 객체화
+  HTML:function(title, list, body, control){
+    return `
+    <!doctype html>
+    <html>
+    <head>
+      <title>WEB1 - ${title}</title>
+      <meta charset="utf-8">
+    </head>
+    <body>
+      <h1><a href="/">WEB</a></h1>
+      ${list}
+      ${control}
+      ${body}
+    </body>
+    </html>
+    `;
+  }, list:function(filelist){ // 글 목록
+    var list = '<ul>';
+    var i = 0;
+    while(i < filelist.length) {
+      list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
+      i += 1;
+    }
+    list = list + '</ul>';
+    return list;
   }
-  list = list + '</ul>';
-  return list;
 }
 
 var app = http.createServer(function(request, response){ // nodejs로 웹 브라우저 접속이 들어올 때마다 createServer의 콜백함수 호출, request는 웹 브라우저가 요청할 때 보낸 정보, response는 응답할 때 웹 브라우저에게 전송할 정보
@@ -43,20 +43,20 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
         fs.readdir('./data', (err, filelist)=>{
           var title = 'Welcome';
           var description = 'Hello, Node.js';
-          var list = templateList(filelist);
-          var template = templateHTML(title, list,
+          var list = template.list(filelist);
+          var html = template.HTML(title, list,
             `<h2>${title}</h2>${description}`,
             `<a href="/create">create</a>`
           );
           response.writeHead(200); // 파일을 성공적으로 전송
-          response.end(template);
+          response.end(html);
         })
       } else {
         fs.readdir('./data', (err, filelist)=>{
           fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
             var title = queryData.id;
-            var list = templateList(filelist);
-            var template = templateHTML(title, list,
+            var list = template.list(filelist);
+            var html = template.HTML(title, list,
               `<h2>${title}</h2>${description}`,
               `<a href="/create">create</a>
                <a href="/update?id=${title}">update</a>
@@ -66,15 +66,15 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
                </form>`
             );
             response.writeHead(200);
-            response.end(template);
+            response.end(html);
           });
         });
       }
     } else if(pathname === '/create') { // create 버튼 눌렀을 경우
       fs.readdir('./data', (err, filelist)=>{
         var title = 'WEB - create';
-        var list = templateList(filelist);
-        var template = templateHTML(title, list, `
+        var list = template.list(filelist);
+        var html = template.HTML(title, list, `
           <form action="/create_process" method="post">
             <p><input type="text" name="title" placeholder="title"></p>
             <p>
@@ -86,7 +86,7 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
           </form>
         `, '');
         response.writeHead(200);
-        response.end(template);
+        response.end(html);
       });
     } else if(pathname === '/create_process') { // create 페이지 submit 버튼 눌렀을 경우
       var body = '';
@@ -106,8 +106,8 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
       fs.readdir('./data', (err, filelist)=>{
         fs.readFile(`data/${queryData.id}`, 'utf8', (err, description)=>{
           var title = queryData.id;
-          var list = templateList(filelist);
-          var template = templateHTML(title, list,
+          var list = template.list(filelist);
+          var html = template.HTML(title, list,
             `
             <form action="/update_process" method="post">
               <input type="hidden" name="id" value="${title}">
@@ -123,7 +123,7 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
             `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
           );
           response.writeHead(200);
-          response.end(template);
+          response.end(html);
         });
       });
     } else if(pathname === '/update_process') { // update 페이지 submit 버튼 눌렀을 경우

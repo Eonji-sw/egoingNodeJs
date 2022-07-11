@@ -83,10 +83,14 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
         body += data; // 콜백 함수가 실행될 때마다 데이터를 추가(정보가 조각조각 들어옴)
       });
       request.on('end', function(){
-        var post = qs.parse(body); // post 전체 정보
+        var post = qs.parse(body); // post 전체 정보 -> 정보 객체화
+        var title = post.title;
+        var description = post.description;
+        fs.writeFile(`data/${title}`, description, 'utf8', (err)=>{
+          response.writeHead(302, {Location: `/?id=${title}`}); // 페이지를 해당 주소로 리다이렉션
+          response.end();
+        })
       });
-      response.writeHead(200);
-      response.end('Success');
     } else {
       response.writeHead(404); // 파일을 찾을 수 없는 경우
       response.end('Not found');

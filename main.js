@@ -2,35 +2,7 @@ var http = require('http');
 var fs = require('fs'); // 모듈 fs : nodejs의 모듈인 파일 시스템
 var url = require('url'); // 모듈 url
 var qs = require('querystring'); // 모듈 querystring
-
-var template = { // 객체화
-  HTML:function(title, list, body, control){
-    return `
-    <!doctype html>
-    <html>
-    <head>
-      <title>WEB1 - ${title}</title>
-      <meta charset="utf-8">
-    </head>
-    <body>
-      <h1><a href="/">WEB</a></h1>
-      ${list}
-      ${control}
-      ${body}
-    </body>
-    </html>
-    `;
-  }, list:function(filelist){ // 글 목록
-    var list = '<ul>';
-    var i = 0;
-    while(i < filelist.length) {
-      list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</a></li>`;
-      i += 1;
-    }
-    list = list + '</ul>';
-    return list;
-  }
-}
+var template = require('./lib/template.js');
 
 var app = http.createServer(function(request, response){ // nodejs로 웹 브라우저 접속이 들어올 때마다 createServer의 콜백함수 호출, request는 웹 브라우저가 요청할 때 보낸 정보, response는 응답할 때 웹 브라우저에게 전송할 정보
     var _url = request.url; // query

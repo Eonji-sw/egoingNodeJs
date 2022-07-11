@@ -58,14 +58,19 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
             var list = templateList(filelist);
             var template = templateHTML(title, list,
               `<h2>${title}</h2>${description}`,
-              `<a href="/create">create</a> <a href="/update?id=${title}">update</a>`
+              `<a href="/create">create</a>
+               <a href="/update?id=${title}">update</a>
+               <form action="/delete_process" method="post">
+                <input type="hidden" name="id" value="${title}">
+                <input type="submit" value="delete">
+               </form>`
             );
             response.writeHead(200);
             response.end(template);
           });
         });
       }
-    } else if(pathname === '/create') { // create 버튼 눌렸을 경우
+    } else if(pathname === '/create') { // create 버튼 눌렀을 경우
       fs.readdir('./data', (err, filelist)=>{
         var title = 'WEB - create';
         var list = templateList(filelist);

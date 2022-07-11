@@ -143,6 +143,19 @@ var app = http.createServer(function(request, response){ // nodejs로 웹 브라
           })
         });
       });
+    } else if(pathname === '/delete_process') { // delete 버튼 눌렀을 경우
+      var body = '';
+      request.on('data', function(data){
+        body += data;
+      });
+      request.on('end', function(){
+        var post = qs.parse(body);
+        var id = post.id;
+        fs.unlink(`data/${id}`, (err)=>{
+          response.writeHead(302, {Location: `/`}); // home으로 보내기
+          response.end();
+        })
+      });
     } else {
       response.writeHead(404); // 파일을 찾을 수 없는 경우
       response.end('Not found');

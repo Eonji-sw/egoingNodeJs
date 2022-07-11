@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs'); // 모듈 fs : nodejs의 모듈인 파일 시스템
 var url = require('url'); // 모듈 url
+var qs = require('querystring'); // 모듈 querystring
 
 function templateHTML(title, list, body){
   return `
@@ -31,7 +32,7 @@ function templateList(filelist){ // 글 목록
   return list;
 }
 
-var app = http.createServer(function(request,response){
+var app = http.createServer(function(request, response){ // nodejs로 웹 브라우저 접속이 들어올 때마다 createServer의 콜백함수 호출, request는 웹 브라우저가 요청할 때 보낸 정보, response는 응답할 때 웹 브라우저에게 전송할 정보
     var _url = request.url; // query
     // url.parse(_url, true) : 주어진 url 정보를 분석
     var queryData = url.parse(_url, true).query; // query 객체 -> { id : 값 }
@@ -58,12 +59,12 @@ var app = http.createServer(function(request,response){
           });
         });
       }
-    } else if(pathname === '/create') {
+    } else if(pathname === '/create') { // create 버튼 눌렸을 경우
       fs.readdir('./data', (err, filelist)=>{
         var title = 'WEB - create';
         var list = templateList(filelist);
         var template = templateHTML(title, list, `
-          <form action="http://localhost:3000/process_create" method="post">
+          <form action="http://localhost:3000/create_process" method="post">
             <p><input type="text" name="title" placeholder="title"></p>
             <p>
               <textarea name="description" placeholder="description"></textarea>
@@ -75,7 +76,17 @@ var app = http.createServer(function(request,response){
         `);
         response.writeHead(200); // 파일을 성공적으로 전송
         response.end(template);
-      })
+      });
+    } else if(pathname === '/create_process') { // create 페이지 submit 버튼 눌렀을 경우
+      var body = '';
+      request.on('data', function(data){
+        body += data; // 콜백 함수가 실행될 때마다 데이터를 추가(정보가 조각조각 들어옴)
+      });
+      request.on('end', function(){
+        var post = qs.parse(body); // post 전체 정보
+      });
+      response.writeHead(200);
+      response.end('Success');
     } else {
       response.writeHead(404); // 파일을 찾을 수 없는 경우
       response.end('Not found');
